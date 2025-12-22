@@ -68,19 +68,23 @@ while True:
         color_izq = sensor_izquierdo.color()
         color_der = sensor_derecho.color()
 
-        if color_izq == Color.GREEN or color_der == Color.GREEN: #Doble verificacion
+        if (color_izq == Color.GREEN or color_der == Color.GREEN) and (color_anterior_izq == Color.BLACK or color_anterior_der == Color.BLACK) :  # si verde es inválido, reproduce un sonido
+            bloque.speaker.beep()
+
+        if (color_izq == Color.GREEN or color_der == Color.GREEN) and (color_anterior_izq != Color.BLACK or color_anterior_der != Color.BLACK): #si alguno ve verde, se fija que el color anterior no sea negro, para ver si es valido o no
             Parar()
-            time.sleep(1) #cambiamos wait por time.sleep
+            time.sleep(2) #cambiamos wait por time.sleep
             Mover(-20, -20, 0)
-            time.sleep(1)
+            time.sleep(1.3)
             Parar()
             time.sleep(2)
             color_izq = sensor_izquierdo.color()
             color_der = sensor_derecho.color()
             time.sleep(1)
-
+        
+            
             # Si los dos detectan verde, mostramos qué había antes
-            if color_izq == Color.GREEN and color_der == Color.GREEN:
+            if color_anterior_izq != Color.BLACK and color_anterior_der != Color.BLACK and color_izq == Color.GREEN and color_der == Color.GREEN :
                 bloque.screen.clear()
                 bloque.screen.print("Verde AMBOS")
                 bloque.screen.print("IZQ antes:", color_anterior_izq)
@@ -92,9 +96,10 @@ while True:
                 while color_izq != Color.BLACK:
                     Mover(100, -100, 0)
                     color_izq = sensor_izquierdo.color()
+                    color_der = sensor_derecho.color()
                 Parar()
-
-            if color_izq == Color.GREEN and color_der != Color.GREEN:
+        
+            if color_anterior_izq != Color.BLACK and color_izq == Color.GREEN and color_der != Color.GREEN:
                 Parar()
                 bloque.screen.clear()
                 bloque.screen.print("Verde IZQ")
@@ -102,27 +107,28 @@ while True:
                 bloque.speaker.beep()
                 Mover(95, 95, 0)
                 time.sleep(1)
-                Mover(-100, 100, 0)
+                Mover(-100,100, 0)
                 time.sleep(2)
                 while color_der != Color.BLACK:
                     Mover(-100, 100, 0)
                     color_der = sensor_derecho.color()
-                Parar()
-
-            if color_der == Color.GREEN and color_izq != Color.GREEN:
+                Parar()   
+        
+            if color_anterior_der != Color.BLACK and color_der == Color.GREEN and color_izq != Color.GREEN:
                 Parar()
                 bloque.screen.clear()
                 bloque.screen.print("Verde DER")
                 bloque.screen.print("Antes:", color_anterior_der)
                 bloque.speaker.beep()
                 Mover(95, 95, 0) #Si avanza demasiado, bajar velocidad
-                time.sleep(1)
+                time.sleep(2)
                 Mover(100, -100, 0)
                 time.sleep(2) #Si se pasa de la línea, bajar este tiempo
                 while color_izq != Color.BLACK:
                     Mover(100, -100, 0)
                     color_izq = sensor_izquierdo.color()
                 Parar()
+            
 
         if color_der != Color.GREEN: # Guardamos el color anterior mientras NO sea verde
             color_anterior_der = color_der
@@ -131,3 +137,5 @@ while True:
             color_anterior_izq = color_izq
 
         ultimo_check = time.time()
+    
+
