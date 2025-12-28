@@ -63,10 +63,17 @@ while True:
     wait(30)
 
     # ahora ven color los dos a la vez para que cuando ambos vean verde no entren en la condición primero uno y después otro
-
+   
     if time.time() - ultimo_check >= CHECK:
         color_izq = sensor_izquierdo.color()
         color_der = sensor_derecho.color()
+
+        if color_izq == Color.RED and color_der == Color.RED:
+            bloque.speaker.beep()
+            bloque.screen.clear()
+            bloque.screen.print("ROJO AMBOS")
+            Parar()
+            time.sleep(10)
 
         if (color_izq == Color.GREEN or color_der == Color.GREEN) and (color_anterior_izq == Color.BLACK or color_anterior_der == Color.BLACK) :  # si verde es inválido, reproduce un sonido
             bloque.speaker.beep()
@@ -106,7 +113,7 @@ while True:
                 bloque.screen.print("Antes:", color_anterior_izq)
                 bloque.speaker.beep()
                 Mover(95, 95, 0)
-                time.sleep(1)
+                time.sleep(2)
                 Mover(-100,100, 0)
                 time.sleep(2)
                 while color_der != Color.BLACK:
@@ -138,4 +145,3 @@ while True:
 
         ultimo_check = time.time()
     
-
