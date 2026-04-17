@@ -1,0 +1,73 @@
+#!/usr/bin/env pybricks-micropython
+
+# pyright: ignore[reportMissingImports]
+
+from pybricks.hubs import EV3Brick # pyright: ignore[reportMissingImports]
+from pybricks.ev3devices import Motor # pyright: ignore[reportMissingImports]
+from pybricks.iodevices import I2CDevice # pyright: ignore[reportMissingImports]
+from pybricks.parameters import Port # pyright: ignore[reportMissingImports]
+from pybricks.tools import wait # pyright: ignore[reportMissingImports]
+
+# EV3
+ev3 = EV3Brick()
+
+# Motores
+motor_izquierdo = Motor(Port.A)
+motor_derecho = Motor(Port.D)
+
+motor_inferiorI = Motor(Port.B)
+motor_inferiorD = Motor(Port.C)
+
+# Sensor array
+sensor = I2CDevice(Port.S4, 0x11)
+
+integral = 0
+error_anterior = 0 
+Kp = 3
+Vel = 80
+
+# Último valor válido
+ultimo = [0, 0, 0, 0, 0]
+
+def leer_array():
+    global ultimo
+
+    try:
+        ultimo = list(sensor.read(0, 5))
+    except:
+        pass
+
+    return ultimo
+
+while True:
+    
+    valores = leer_array()
+    print(valores)
+    resetvalores = [0, 0, 0, 0, 0]
+    if valores == resetvalores:
+        valores = ultimo
+    suma = 1
+
+    for i in range(len(valores)):
+        suma += suma + valores[i]
+
+    if suma == 0:
+        error = 0
+    else:
+        error = ((300 * valores[4]) + (100 * valores[3]) + (0 * valores[2]) - (100 * valores[1]) - (300* valores[0]) ) / suma
+    print("Error:", error)
+
+    ev3.screen.clear()
+    ev3.screen.draw_text(5, 10, "Error: " + str(error))
+
+    Correccion = error * Kp
+    VelocidadIzquierda = Vel - Correccion
+    VelocidadDerecha = Vel + Correccion
+
+    motor_izquierdo.run(VelocidadIzquierda)
+    motor_inferiorI.run(VelocidadIzquierda)
+
+    motor_derecho.run(VelocidadDerecha)
+    motor_inferiorD.run(VelocidadDerecha)
+
+    wait(130)
